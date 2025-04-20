@@ -1,8 +1,7 @@
 // api/modules/tuya.js
 const axios = require('axios');
 const crypto = require('crypto');
-const { getRedisClient } = require('../lib/redis');
-
+const { getRedisClient } = require('../../lib/redis');
 // Create signature for requests
 function generateSign(method, path, body = "", token = "") {
   const { TUYA_CLIENT_ID, TUYA_CLIENT_SECRET } = process.env;
