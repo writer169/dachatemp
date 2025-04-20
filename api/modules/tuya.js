@@ -228,7 +228,7 @@ module.exports = async (queryParams = {}) => {
       return { success: result.success, path: path, method: method, result: result, message: `Request ${method} ${path} processed.` };
     }
 
-    // Get device status - modified to return only result[0].value / 10
+    // Get device status - modified to return only result[0].value / 10 in JSON format
     else if (action === 'status' && queryParams.id) {
       const deviceId = queryParams.id;
       const path = `/v1.0/iot-03/devices/${deviceId}/status`;
@@ -239,7 +239,8 @@ module.exports = async (queryParams = {}) => {
       if (result.success && Array.isArray(result.result) && result.result.length > 0 && result.result[0]?.value !== undefined) {
         // Parse the value and divide by 10
         const parsedValue = parseFloat(result.result[0].value) / 10;
-        return parsedValue;
+        // Return in JSON format
+        return { value: parsedValue };
       } else {
         console.warn("Tuya API returned unexpected data format for status:", result);
         return {
