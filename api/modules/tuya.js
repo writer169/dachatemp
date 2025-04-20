@@ -228,21 +228,26 @@ module.exports = async (queryParams = {}) => {
       return { success: result.success, path: path, method: method, result: result, message: `Request ${method} ${path} processed.` };
     }
 
-    // Get device status - new action specifically for device status
+    // Get device status - modified to return only result[0].value / 10
     else if (action === 'status' && queryParams.id) {
       const deviceId = queryParams.id;
       const path = `/v1.0/iot-03/devices/${deviceId}/status`;
       console.log(`Requesting status for device ${deviceId}...`);
       const result = await makeCustomRequest('GET', path);
-      return {
-        success: result.success,
-        device_id: deviceId,
-        status: result.result || null,
-        message: result.success ? `Status for device ${deviceId}` : `Error getting device status: ${result.msg || 'Unknown error'}`,
-        tuya_code: result.code,
-        tuya_msg: result.msg,
-        timestamp: new Date().toISOString()
-      };
+      
+      // Check if the result was successful and contains the expected data
+      if (result.success && Array.isArray(result.result) && result.result.length > 0 && result.result[0]?.value !== undefined) {
+        // Parse the value and divide by 10
+        const parsedValue = parseFloat(result.result[0].value) / 10;
+        return parsedValue;
+      } else {
+        console.warn("Tuya API returned unexpected data format for status:", result);
+        return {
+          success: false,
+          message: "Failed to parse device status data",
+          tuya_response: result
+        };
+      }
     }
 
     // List devices
